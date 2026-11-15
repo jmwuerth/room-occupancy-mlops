@@ -1,0 +1,19 @@
+
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN groupadd -g 999 appuser && \
+    useradd -r -u 999 -g appuser -s /sbin/nologin appuser
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ ./src/
+COPY models/ ./models/
+
+RUN chown -R appuser:appuser /app
+USER appuser
+
+EXPOSE 8080
+ENTRYPOINT ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8080"]
